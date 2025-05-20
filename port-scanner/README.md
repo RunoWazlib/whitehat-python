@@ -12,8 +12,4 @@ Simple python-based TCP port scanner
 - bash
 - pipenv shell
 - python main.py
-<<<<<<< HEAD
 * (Enter IP or hostname when prompted)
-=======
-* Enter IP or hostname when prompted
->>>>>>> 07ecaa5 (Update README)
