@@ -8,7 +8,7 @@ Simple python-based TCP port scanner
 - Identifies open ports and available service on port
 
 ## Usage
-``bash
+`bash
 pipenv shell
-python main.py
+python main.py`
 * Enter IP or hostname when prompted
