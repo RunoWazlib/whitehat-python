@@ -1,5 +1,6 @@
 import socket
-import datetime
+from datetime import datetime
+import subprocess
 
 def scan_ports(target, port_range=range(1,1025)):
     print(f"\n[*] Scanning target: {target}")
@@ -27,5 +28,14 @@ def scan_ports(target, port_range=range(1,1025)):
             print(f"[-] Port {port} is closed")
 
 if __name__ == "__main__":
-    target_host = input("Enter IP or Hostname to scan:\n")
-    scan_ports(target_host)
+    auto_seek = input("Automatically seek target(s)? (Y/n)\n")
+    if auto_seek == "n":
+        target_host = input("Enter IP or Hostname to scan:\n")
+        scan_ports(target_host)
+    else:
+        # determine all IPv4 addresses on current device
+        possible_targets = subprocess.run(["ifconfig | grep inet"], shell=True, text=True, capture_output=True)
+        # TODO - Scrub this output by "\t" to determine addresses
+        # Scan all targets
+        for target_host in possible_targets:
+            scan_ports(target_host)
