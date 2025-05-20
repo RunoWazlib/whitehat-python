@@ -1,6 +1,7 @@
 import socket
 from datetime import datetime
 import subprocess
+import re
 
 def scan_ports(target, port_range=range(1,1025)):
     print(f"\n[*] Scanning target: {target}")
@@ -34,8 +35,17 @@ if __name__ == "__main__":
         scan_ports(target_host)
     else:
         # determine all IPv4 addresses on current device
-        possible_targets = subprocess.run(["ifconfig | grep inet"], shell=True, text=True, capture_output=True)
-        # TODO - Scrub this output by "\t" to determine addresses
+        try:
+            # Mac
+            raw_targets = subprocess.run(["ifconfig | grep inet"], shell=True, text=True, capture_output=True).stdout
+        except:
+            # Windows
+            raw_targets = subprocess.run("ipconfig")
+        
+        # Scrub this output to determine addresses
+        ipv4_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+        possible_targets = re.findall(ipv4_pattern, raw_targets)
+        
         # Scan all targets
         for target_host in possible_targets:
             scan_ports(target_host)
