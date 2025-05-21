@@ -3,9 +3,13 @@ from datetime import datetime
 import subprocess
 import re
 
-def scan_ports(target, port_range=range(1,1025)):
+def scan_ports(target, file_to_write=None, port_range=range(1,1025)):
     print(f"\n[*] Scanning target: {target}")
     print(f"\n[*] Start time: {datetime.now()}")
+    if file_to_write != None:
+        print(f"\n[*] Writing results to file: {file_to_write}")
+        with open(file_to_write, "a+") as f:
+            f.write(f"[*] Scanning target: {target}\n[*] Start time: {datetime.now()}")
 
     for port in port_range:
         # Define a socket stream for IPv4 adresses and TCP connection
@@ -15,18 +19,38 @@ def scan_ports(target, port_range=range(1,1025)):
 
         result = sock.connect_ex((target, port))
         
-        # Check if port is open
-        if result == 0:
-            try:
-                # Check what the service looks like (ssh, http, https, etc.)
-                service = socket.getservbyport(port)
-            except:
-                # Service is unusual or not recognized
-                service = "Unknown"
-            print(f"[+] Port {port} is open - ({service})")
-            sock.close()
+        # If there isn't a file to write to, print output
+        if file_to_write == None:
+            # Check if port is open
+            if result == 0:
+                try:
+                    # Check what the service looks like (ssh, http, https, etc.)
+                    service = socket.getservbyport(port)
+                except:
+                    # Service is unusual or not recognized
+                    service = "Unknown"
+                print(f"[+] Port {port} is open - ({service})")
+                sock.close()
+            else:
+                print(f"[-] Port {port} is closed")
+    
+        # If there's a file to write to, export output
         else:
-            print(f"[-] Port {port} is closed")
+             # Check if port is open
+            if result == 0:
+                try:
+                    # Check what the service looks like (ssh, http, https, etc.)
+                    service = socket.getservbyport(port)
+                except:
+                    # Service is unusual or not recognized
+                    service = "Unknown"
+                out = f"\n[+] Port {port} is open - ({service})"
+                sock.close()
+            else:
+                out = f"\n[-] Port {port} is closed"
+            # Write to file if available
+            with open(file_to_write, "a+") as f:
+                f.write(out)
 
 if __name__ == "__main__":
     auto_seek = input("Automatically seek target(s)? (Y/n)\n")
@@ -37,7 +61,7 @@ if __name__ == "__main__":
         # determine all IPv4 addresses on current device
         try:
             # Mac
-            raw_targets = subprocess.run(["ifconfig | grep inet"], shell=True, text=True, capture_output=True).stdout
+            raw_targets = subprocess.run(["ifconfig"], shell=True, text=True, capture_output=True).stdout
         except:
             # Windows
             raw_targets = subprocess.run("ipconfig")
@@ -48,4 +72,4 @@ if __name__ == "__main__":
         
         # Scan all targets
         for target_host in possible_targets:
-            scan_ports(target_host)
+            scan_ports(target_host, f"{target_host} Port Scan.txt")
