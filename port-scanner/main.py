@@ -56,7 +56,11 @@ if __name__ == "__main__":
     auto_seek = input("Automatically seek target(s)? (Y/n)\n")
     if auto_seek == "n":
         target_host = input("Enter IP or Hostname to scan:\n")
-        scan_ports(target_host)
+        file_out = input("Save results? (Y/n)\n")
+        if file_out != "n":
+            scan_ports(target_host, f"{target_host} Port Scan.txt")
+        else:
+            scan_ports(target_host)
     else:
         # determine all IPv4 addresses on current device
         try:
